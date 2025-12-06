@@ -1,0 +1,53 @@
+﻿@model IEnumerable<Hospital.Models.DoctorSchedule>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.available_date)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.start_time)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.end_time)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Doctor)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.available_date)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.start_time)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.end_time)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Doctor.doctor_id)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.schedule_id">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.schedule_id">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.schedule_id">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
