@@ -8,11 +8,59 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Hospital.styles.css" asp-append-version="true" />
 </head>
+<script>
+    // Auto-add text to all action buttons on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        // Function to add text to buttons
+        function addButtonText() {
+            // Find all buttons with Font Awesome icons
+            const buttons = document.querySelectorAll('.btn');
+
+            buttons.forEach(button => {
+                const icon = button.querySelector('i');
+                if (!icon) return;
+
+                // Check if button already has text
+                if (button.textContent.trim().length > 2) return;
+
+                // Add text based on icon class
+                if (icon.classList.contains('fa-eye') ||
+                    icon.classList.contains('fa-info-circle')) {
+                    button.innerHTML = '<i class="' + icon.className + '"></i> View';
+                }
+                else if (icon.classList.contains('fa-edit') ||
+                         icon.classList.contains('fa-pencil-alt')) {
+                    button.innerHTML = '<i class="' + icon.className + '"></i> Edit';
+                }
+                else if (icon.classList.contains('fa-trash') ||
+                         icon.classList.contains('fa-trash-alt')) {
+                    button.innerHTML = '<i class="' + icon.className + '"></i> Delete';
+                }
+                else if (icon.classList.contains('fa-plus')) {
+                    button.innerHTML = '<i class="' + icon.className + '"></i> Add';
+                }
+                else if (icon.classList.contains('fa-save')) {
+                    button.innerHTML = '<i class="' + icon.className + '"></i> Save';
+                }
+                else if (icon.classList.contains('fa-times')) {
+                    button.innerHTML = '<i class="' + icon.className + '"></i> Cancel';
+                }
+            });
+        }
+
+        // Run on page load
+        addButtonText();
+
+        // Also run when content changes (for dynamic content)
+        const observer = new MutationObserver(addButtonText);
+        observer.observe(document.body, { childList: true, subtree: true });
+    });
+</script>
 <body>
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Hospital</a>
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Szabist Hospital</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -20,34 +68,59 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link text-white" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Patients" asp-action="Index">Patients</a>
+                            <a class="nav-link text-white" asp-controller="Patients" asp-action="Index">Patients</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Doctors" asp-action="Index">Doctors</a>
+                            <a class="nav-link text-white" asp-controller="Doctors" asp-action="Index">Doctors</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Departments" asp-action="Index">Departments</a>
+                            <a class="nav-link text-white" asp-controller="Departments" asp-action="Index">Departments</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Appointments" asp-action="Index">Appointments</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Billings" asp-action="Index">Billing</a>
+                            <a class="nav-link text-white" asp-controller="Appointments" asp-action="Index">Appointments</a>
                         </li>
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown">
-                                Medical
+                            <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
+                                Medical & Billing
                             </a>
                             <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" asp-controller="MedicalRecords" asp-action="Index">Medical Records</a></li>
-                                <li><a class="dropdown-item" asp-controller="Prescriptions" asp-action="Index">Prescriptions</a></li>
-                                <li><a class="dropdown-item" asp-controller="DoctorSchedules" asp-action="Index">Schedules</a></li>
+                                <li>
+                                    <a class="dropdown-item" asp-controller="MedicalRecords" asp-action="Index">
+                                        <i class="fas fa-file-medical me-2"></i>Medical Records
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" asp-controller="Prescriptions" asp-action="Index">
+                                        <i class="fas fa-prescription me-2"></i>Prescriptions
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" asp-controller="DoctorSchedules" asp-action="Index">
+                                        <i class="fas fa-calendar-alt me-2"></i>Schedules
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item" asp-controller="Billings" asp-action="Index">
+                                        <i class="fas fa-file-invoice-dollar me-2"></i>Billing & Invoices
+                                    </a>
+                                </li>
                             </ul>
                         </li>
                     </ul>
+
+                    <!-- Login/Register buttons with good contrast -->
+                    <div class="navbar-nav align-items-center">
+                        <a class="btn btn-outline-light me-2" href="#">
+                            <i class="fas fa-user-plus me-1"></i> Register
+                        </a>
+                        <a class="btn btn-light text-primary fw-bold" href="#">
+                            <i class="fas fa-sign-in-alt me-1"></i> Login
+                        </a>
+                    </div>
                 </div>
             </div>
         </nav>
@@ -58,9 +131,19 @@
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
+    <footer class="footer py-3 mt-5 border-top" style="background-color: #f8f9fa;">
         <div class="container">
-            &copy; 2025 - Hospital - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <span class="text-muted">
+                        &copy; @DateTime.Now.Year - City General Hospital Management System
+                    </span>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <a href="#" class="text-muted me-3"><i class="fas fa-phone me-1"></i> Emergency: 911</a>
+                    <a asp-controller="Home" asp-action="Privacy" class="text-muted">Privacy Policy</a>
+                </div>
+            </div>
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>

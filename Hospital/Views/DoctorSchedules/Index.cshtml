@@ -1,53 +1,183 @@
 ﻿@model IEnumerable<Hospital.Models.DoctorSchedule>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Doctor Schedules";
 }
 
-<h1>Index</h1>
+<h2><i class="fas fa-calendar-alt text-primary"></i> Doctor Schedules</h2>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.available_date)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.start_time)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.end_time)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Doctor)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.available_date)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.start_time)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.end_time)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Doctor.doctor_id)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.schedule_id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.schedule_id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.schedule_id">Delete</a>
-            </td>
-        </tr>
+<!-- Simple Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white text-center p-3">
+            <i class="fas fa-user-md fa-2x mb-2"></i>
+            <h4>@ViewBag.TotalDoctors</h4>
+            <p class="mb-0">Doctors</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white text-center p-3">
+            <i class="fas fa-calendar-check fa-2x mb-2"></i>
+            <h4>@Model.Count()</h4>
+            <p class="mb-0">Schedules</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white text-center p-3">
+            <i class="fas fa-clock fa-2x mb-2"></i>
+            <h4>@GetTotalHours() hrs</h4>
+            <p class="mb-0">Total Hours</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white text-center p-3">
+            <i class="fas fa-users fa-2x mb-2"></i>
+            <h4>@GetTotalAppointments()</h4>
+            <p class="mb-0">Bookings</p>
+        </div>
+    </div>
+</div>
+
+<!-- Simple Weekly View -->
+<div class="card mb-4">
+    <div class="card-header bg-light">
+        <h5 class="mb-0"><i class="fas fa-calendar-week me-2"></i> This Week</h5>
+    </div>
+    <div class="card-body p-2">
+        <div class="table-responsive">
+            <table class="table table-bordered mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="text-center">Mon</th>
+                        <th class="text-center">Tue</th>
+                        <th class="text-center">Wed</th>
+                        <th class="text-center">Thu</th>
+                        <th class="text-center">Fri</th>
+                        <th class="text-center">Sat</th>
+                        <th class="text-center">Sun</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        @for (int i = 0; i < 7; i++)
+                        {
+                            var day = DateTime.Today.AddDays(i);
+                            var daySchedules = Model.Where(s => s.available_date.Date == day.Date).Count();
+                            <td class="text-center p-3 @(day.DayOfWeek == DayOfWeek.Saturday || day.DayOfWeek == DayOfWeek.Sunday ? "bg-light" : "")">
+                                <div class="fw-bold">@day.ToString("dd")</div>
+                                <div class="small text-muted mb-2">@day.ToString("ddd")</div>
+                                @if (daySchedules > 0)
+                                {
+                                    <span class="badge bg-success">@daySchedules slots</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">None</span>
+                                }
+                            </td>
+                        }
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Simple Table -->
+<div class="card">
+    <div class="card-body p-0">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Doctor</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Booked</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.OrderBy(s => s.available_date))
+                {
+                    <tr>
+                        <td>
+                            <strong>Dr. @item.Doctor?.first_name</strong>
+                            <div class="small text-muted">@item.Doctor?.specialization</div>
+                        </td>
+                        <td>
+                            @item.available_date.ToString("MMM dd")
+                            <div class="small text-muted">@item.available_date.ToString("ddd")</div>
+                        </td>
+                        <td>
+                            <span class="badge bg-info">
+                                @item.start_time.ToString("hh:mm tt") - @item.end_time.ToString("hh:mm tt")
+                            </span>
+                        </td>
+                        <td>
+                            @{
+                                var booked = GetAppointmentCount(item.schedule_id);
+                                var total = 8;
+                                var percent = (booked * 100) / total;
+                            }
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar bg-success" style="width: @percent%"></div>
+                            </div>
+                            <small>@booked/@total slots</small>
+                        </td>
+                        <td>
+                            @if (item.available_date < DateTime.Today)
+                            {
+                                <span class="badge bg-secondary">Past</span>
+                            }
+                            else if (item.available_date == DateTime.Today)
+                            {
+                                <span class="badge bg-primary">Today</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-success">Upcoming</span>
+                            }
+                        </td>
+                        <td>
+                            <a asp-action="Edit" asp-route-id="@item.schedule_id" class="btn btn-sm btn-warning">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a asp-action="Delete" asp-route-id="@item.schedule_id" class="btn btn-sm btn-danger">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <div class="card-footer text-center">
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Add Schedule
+        </a>
+    </div>
+</div>
+
+@functions {
+    private int GetTotalHours()
+    {
+        int total = 0;
+        foreach (var s in Model)
+        {
+            total += (s.end_time - s.start_time).Hours;
+        }
+        return total;
+    }
+
+    private int GetTotalAppointments()
+    {
+        // Demo count
+        return Model.Count() * 3;
+    }
+
+    private int GetAppointmentCount(int scheduleId)
+    {
+        return new Random(scheduleId).Next(0, 8);
+    }
 }
-    </tbody>
-</table>

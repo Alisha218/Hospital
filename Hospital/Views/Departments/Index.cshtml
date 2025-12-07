@@ -1,41 +1,411 @@
 ﻿@model IEnumerable<Hospital.Models.Department>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Hospital Departments";
 }
 
-<h1>Index</h1>
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2><i class="fas fa-building text-primary"></i> Hospital Departments</h2>
+        <p class="text-muted">Manage medical departments and specialties</p>
+    </div>
+    <a asp-action="Create" class="btn btn-primary btn-lg">
+        <i class="fas fa-plus-circle"></i> Add New Department
+    </a>
+</div>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.name)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.location)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.location)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.department_id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.department_id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.department_id">Delete</a>
-            </td>
-        </tr>
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-md-4 mb-3">
+        <div class="card border-0 shadow-sm bg-gradient-primary text-white">
+            <div class="card-body text-center py-4">
+                <i class="fas fa-building fa-3x mb-3 opacity-75"></i>
+                <h2 class="display-5 fw-bold">@Model.Count()</h2>
+                <p class="mb-0 fs-5">Total Departments</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-3">
+        <div class="card border-0 shadow-sm bg-gradient-success text-white">
+            <div class="card-body text-center py-4">
+                <i class="fas fa-user-md fa-3x mb-3 opacity-75"></i>
+                <h2 class="display-5 fw-bold">@ViewBag.TotalDoctors</h2>
+                <p class="mb-0 fs-5">Doctors Across Departments</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-3">
+        <div class="card border-0 shadow-sm bg-gradient-info text-white">
+            <div class="card-body text-center py-4">
+                <i class="fas fa-procedures fa-3x mb-3 opacity-75"></i>
+                <h2 class="display-5 fw-bold">24/7</h2>
+                <p class="mb-0 fs-5">Emergency Services</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search Section -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-light">
+        <h5 class="mb-0"><i class="fas fa-search me-2"></i>Find Department</h5>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-8">
+                <div class="input-group">
+                    <span class="input-group-text bg-white">
+                        <i class="fas fa-search text-muted"></i>
+                    </span>
+                    <input type="text" class="form-control" placeholder="Search departments by name or location...">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="input-group">
+                    <span class="input-group-text bg-white">
+                        <i class="fas fa-filter text-primary"></i>
+                    </span>
+                    <select class="form-control">
+                        <option value="">All Departments</option>
+                        <option value="Medical">Medical</option>
+                        <option value="Surgical">Surgical</option>
+                        <option value="Diagnostic">Diagnostic</option>
+                        <option value="Emergency">Emergency</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Departments Grid View -->
+<div class="row mb-4">
+    @foreach (var department in Model)
+    {
+        <div class="col-md-4 mb-4">
+            <div class="card department-card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="department-icon mb-3 text-center">
+                        @{
+                            var icon = GetDepartmentIcon(department.name);
+                            var color = GetDepartmentColor(department.name);
+                        }
+                        <div class="icon-circle mx-auto" style="
+                                width: 80px;
+                                height: 80px;
+                                background: @color;
+                                border-radius: 50%;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                color: white;
+                                font-size: 2rem;
+                                margin-bottom: 20px;
+                            ">
+                            <i class="@icon"></i>
+                        </div>
+                    </div>
+
+                    <h4 class="card-title text-center mb-2">@department.name</h4>
+                    <p class="text-muted text-center mb-3">
+                        <i class="fas fa-map-marker-alt me-1"></i>
+                        @department.location
+                    </p>
+
+                    <div class="department-stats text-center mb-3">
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="stat-number fw-bold">@GetDoctorCount(department.department_id)</div>
+                                <div class="stat-label small text-muted">Doctors</div>
+                            </div>
+                            <div class="col-6">
+                                <div class="stat-number fw-bold">24/7</div>
+                                <div class="stat-label small text-muted">Service</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-3">
+                        <a asp-action="Details" asp-route-id="@department.department_id"
+                           class="btn btn-sm btn-outline-primary me-2">
+                            <i class="fas fa-eye"></i> View
+                        </a>
+                        <a asp-action="Edit" asp-route-id="@department.department_id"
+                           class="btn btn-sm btn-outline-warning me-2">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                        <a asp-action="Delete" asp-route-id="@department.department_id"
+                           class="btn btn-sm btn-outline-danger">
+                            <i class="fas fa-trash"></i> Delete
+                        </a>
+                    </div>
+                </div>
+                <div class="card-footer bg-light text-center">
+                    <small class="text-muted">
+                        <i class="fas fa-door-open me-1"></i>
+                        Department ID: @department.department_id
+                    </small>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Table View Toggle (Optional) -->
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="fas fa-list me-2"></i>All Departments List</h5>
+        <div class="btn-group" role="group">
+            <button type="button" class="btn btn-outline-primary active">
+                <i class="fas fa-th-large"></i> Grid
+            </button>
+            <button type="button" class="btn btn-outline-primary">
+                <i class="fas fa-list"></i> List
+            </button>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">
+                            <i class="fas fa-hashtag me-2"></i>Dept. ID
+                        </th>
+                        <th>
+                            <i class="fas fa-building me-2"></i>Department Name
+                        </th>
+                        <th>
+                            <i class="fas fa-map-marker-alt me-2"></i>Location
+                        </th>
+                        <th>
+                            <i class="fas fa-user-md me-2"></i>Doctors
+                        </th>
+                        <th>
+                            <i class="fas fa-bed me-2"></i>Facilities
+                        </th>
+                        <th class="text-end pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="ps-4 fw-bold">
+                                <span class="badge bg-primary bg-opacity-10 text-primary">
+                                    DEPT-@item.department_id
+                                </span>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    @{
+                                        var tableIcon = GetDepartmentIcon(item.name);
+                                        var tableColor = GetDepartmentColor(item.name);
+                                    }
+                                    <div class="icon-circle-small me-3" style="
+                                            width: 40px;
+                                            height: 40px;
+                                            background: @tableColor;
+                                            border-radius: 50%;
+                                            display: flex;
+                                            align-items: center;
+                                            justify-content: center;
+                                            color: white;
+                                        ">
+                                        <i class="@tableIcon"></i>
+                                    </div>
+                                    <div>
+                                        <strong>@item.name</strong>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="text-muted">
+                                    <i class="fas fa-map-marker-alt me-1"></i>
+                                    @item.location
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge bg-info bg-opacity-10 text-info">
+                                    <i class="fas fa-user-md me-1"></i>
+                                    @GetDoctorCount(item.department_id) Doctors
+                                </span>
+                            </td>
+                            <td>
+                                <div class="small">
+                                    <span class="badge bg-success bg-opacity-10 text-success me-1">
+                                        <i class="fas fa-bed"></i> Beds
+                                    </span>
+                                    <span class="badge bg-warning bg-opacity-10 text-warning">
+                                        <i class="fas fa-ambulance"></i> Emergency
+                                    </span>
+                                </div>
+                            </td>
+                            <td class="text-end pe-4">
+                                <div class="btn-group" role="group">
+                                    <a asp-action="Details" asp-route-id="@item.department_id"
+                                       class="btn btn-sm btn-outline-info" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a asp-action="Edit" asp-route-id="@item.department_id"
+                                       class="btn btn-sm btn-outline-warning" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@item.department_id"
+                                       class="btn btn-sm btn-outline-danger" title="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer bg-light">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <span class="text-muted">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Showing <strong>@Model.Count()</strong> departments
+                </span>
+            </div>
+            <div class="col-md-6 text-end">
+                <a asp-action="Create" class="btn btn-primary">
+                    <i class="fas fa-plus-circle me-2"></i>Add New Department
+                </a>
+                <a href="#" class="btn btn-outline-secondary ms-2">
+                    <i class="fas fa-print me-2"></i>Print List
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- C# Helper Functions (Inline) -->
+@functions {
+    private string GetDepartmentIcon(string departmentName)
+    {
+        return departmentName.ToLower() switch
+        {
+            var d when d.Contains("cardio") => "fas fa-heartbeat",
+            var d when d.Contains("neuro") => "fas fa-brain",
+            var d when d.Contains("ortho") => "fas fa-bone",
+            var d when d.Contains("pediat") => "fas fa-baby",
+            var d when d.Contains("emergency") => "fas fa-ambulance",
+            var d when d.Contains("surgery") => "fas fa-syringe",
+            var d when d.Contains("radio") => "fas fa-x-ray",
+            var d when d.Contains("eye") => "fas fa-eye",
+            var d when d.Contains("dental") => "fas fa-tooth",
+            _ => "fas fa-stethoscope"
+        };
+    }
+
+    private string GetDepartmentColor(string departmentName)
+    {
+        return departmentName.ToLower() switch
+        {
+            var d when d.Contains("cardio") => "linear-gradient(135deg, #dc3545 0%, #fd7e14 100%)",
+            var d when d.Contains("neuro") => "linear-gradient(135deg, #6610f2 0%, #0d6efd 100%)",
+            var d when d.Contains("ortho") => "linear-gradient(135deg, #fd7e14 0%, #ffc107 100%)",
+            var d when d.Contains("pediat") => "linear-gradient(135deg, #20c997 0%, #0dcaf0 100%)",
+            var d when d.Contains("emergency") => "linear-gradient(135deg, #dc3545 0%, #fd7e14 100%)",
+            var d when d.Contains("surgery") => "linear-gradient(135deg, #198754 0%, #20c997 100%)",
+            var d when d.Contains("radio") => "linear-gradient(135deg, #0dcaf0 0%, #20c997 100%)",
+            _ => "linear-gradient(135deg, #0d6efd 0%, #198754 100%)"
+        };
+    }
+
+    private int GetDoctorCount(int departmentId)
+    {
+        // This would come from your database
+        // For now, return a random number for demo
+        return new Random().Next(5, 20);
+    }
 }
-    </tbody>
-</table>
+
+<!-- Custom Styles -->
+<style>
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%) !important;
+    }
+
+    .bg-gradient-success {
+        background: linear-gradient(135deg, #198754 0%, #20c997 100%) !important;
+    }
+
+    .bg-gradient-info {
+        background: linear-gradient(135deg, #0dcaf0 0%, #20c997 100%) !important;
+    }
+
+    .department-card {
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+
+        .department-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+            border-color: #0d6efd;
+        }
+
+    .icon-circle {
+        transition: transform 0.3s ease;
+    }
+
+    .department-card:hover .icon-circle {
+        transform: scale(1.1) rotate(5deg);
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: rgba(13, 110, 253, 0.05) !important;
+    }
+
+    .icon-circle-small {
+        transition: transform 0.3s ease;
+    }
+
+    tr:hover .icon-circle-small {
+        transform: scale(1.1);
+    }
+
+    .stat-number {
+        font-size: 1.5rem;
+        color: #0d6efd;
+    }
+
+    .btn-group .btn {
+        border-radius: 6px !important;
+        margin: 0 2px;
+    }
+</style>
+
+<script>
+    // Simple toggle between grid and list view
+    document.addEventListener('DOMContentLoaded', function() {
+        const gridBtn = document.querySelector('.btn-group .btn:nth-child(1)');
+        const listBtn = document.querySelector('.btn-group .btn:nth-child(2)');
+        const gridView = document.querySelector('.row.mb-4');
+        const tableView = document.querySelector('.card.border-0.shadow-sm:last-child');
+
+        if (gridBtn && listBtn) {
+            listBtn.addEventListener('click', function() {
+                gridView.style.display = 'none';
+                tableView.style.display = 'block';
+                gridBtn.classList.remove('active');
+                listBtn.classList.add('active');
+            });
+
+            gridBtn.addEventListener('click', function() {
+                gridView.style.display = 'flex';
+                tableView.style.display = 'none';
+                listBtn.classList.remove('active');
+                gridBtn.classList.add('active');
+            });
+        }
+    });
+</script>
